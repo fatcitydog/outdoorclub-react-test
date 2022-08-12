@@ -1,11 +1,12 @@
-import { useState } from "react";
-import ItemList from "./components/ItemList";
+import MemberPage from "./page/MemberPage";
+import { GlobalStyles } from "./styles/globalStyles";
 
 function App() {
   return (
-    <div className="App">
-      <ItemList />
-    </div>
+    <>
+      <GlobalStyles />
+      <MemberPage />
+    </>
   );
 }
 

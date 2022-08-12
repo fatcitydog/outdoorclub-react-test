@@ -1,84 +1,39 @@
-import { useEffect, useState } from "react";
-
-import { memberData, activities } from "../utils/content";
 import Item from "./Item";
+import CountMember from "./CountMember";
+import { activities } from "../utils/content";
 
-export default function ItemList() {
-  const [selectedActivity, setSelectedActivity] = useState("");
-  const [filterList, setFilterList] = useState("");
-
-  const handleSearch = (e) => {
-    let input = e.target.value;
-    if (filterList.length < 1) return;
-    if (input === "") {
-      return setFilterList(memberData);
+export default function ItemList({
+  handleRemove,
+  dataList,
+  searchValue,
+  selectedActivity,
+}) {
+  const filteredbyNameData = dataList.filter((result) => {
+    if (searchValue === "") {
+      return result;
     }
-    const filteredValues = memberData.filter(
-      (item) =>
-        item.name
-          .toLowerCase()
-          .replace(/\s+/g, "")
-          .indexOf(input.toLowerCase().replace(/\s+/g, "")) !== -1
-    );
-    setFilterList(filteredValues);
-  };
+    const input = searchValue.toLowerCase().replace(/\s+/g, "");
+    return result.name.toLowerCase().replace(/\s+/g, "").indexOf(input) !== -1;
+  });
 
-  const handleFilterByAct = (e) => {
-    let selectedValue = e.target.value;
-    setSelectedActivity(selectedValue);
-    if (filterList.length < 1) return;
-    if (selectedValue === "") {
-      return setFilterList(memberData);
+  const filteredbyActivityData = filteredbyNameData.filter((result) => {
+    if (selectedActivity === "") {
+      return result;
     }
-    const activitiesArray = memberData.map((act) => {
-      let selected = act.participantedActivities.filter(
-        (item) => item.indexOf(selectedValue) !== -1
-      );
-      if (selected > 1) {
-        return act;
-      }
-      
+    return result.participantedActivities.indexOf(selectedActivity) !== -1;
+  });
+
+  const countMember = (activity) => {
+    const count = dataList.filter((item) => {
+      return item.participantedActivities.indexOf(activity) !== -1;
     });
-    console.log(activitiesArray);
-
-    // setFilterList(activitiesArray);
+    return count.length;
   };
-
-  const handleRemove = (e) => {
-    const selectedItem = parseInt(e.target.value);
-    console.log(selectedItem);
-    const removeArray = filterList.filter((item) => item.id !== selectedItem);
-    setFilterList(removeArray);
-  };
-
-  useEffect(() => {
-    setFilterList(memberData);
-  }, []);
 
   return (
     <div>
-      <div>
-        search:
-        <input type="text" onChange={handleSearch} />
-      </div>
-      <div>
-        Choosing an activity:
-        <select
-          name="activities"
-          value={selectedActivity}
-          onChange={handleFilterByAct}
-        >
-          <option>-- select an option --</option>
-          {activities.map((activity, index) => (
-            <option value={activity} key={index}>
-              {activity}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {filterList &&
-        filterList.map((member) => (
+      {filteredbyActivityData &&
+        filteredbyActivityData.map((member) => (
           <Item
             key={member.id}
             name={member.name}
@@ -89,9 +44,10 @@ export default function ItemList() {
             id={member.id}
           />
         ))}
-      <div>Hiking: {} people</div>
-      <div>Running: {} people</div>
-      <div>Biking: {} people</div>
+      {filteredbyActivityData.length < 1 && <div>No memeber found</div>}
+      {activities.map((item, index) => (
+        <CountMember key={index} countMember={countMember} activity={item} />
+      ))}
     </div>
   );
 }
